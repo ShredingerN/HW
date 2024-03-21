@@ -1,11 +1,13 @@
 using HW;
+using Bogus;
+using FluentAssertions;
 
 namespace TestHW;
 
 public class Tests
 {
     [Fact] 
-    public void PostingCountTest()
+    public void PostingTest()
     {
         //Arrange
         List<Posting> postings = new List<Posting>
@@ -23,16 +25,7 @@ public class Tests
         };
         //Act
         PostingDB.Add(postings);
-        // Assert
-        Assert.Equal(postings.Count, PostingDB.Postings.Count);
-    }
-
-    [Fact] 
-    public void PostingIsUniqTest()
-    {
         long postingId = 7;
-
-        // Act
         var checkPosting = PostingDB.Postings[postingId].Code;
         int count = 0;
         foreach (var posting in PostingDB.Postings.Values)
@@ -45,5 +38,25 @@ public class Tests
 
         //Assert
         Assert.Equal(1, count);
+        Assert.Equal(postings.Count, PostingDB.Postings.Count);
+    }
+
+    private Faker _randomcodes = new Faker();
+
+    [Fact] 
+    public void PostingTest1()
+    {
+        var postings = new List<Posting>();
+        for (var i = 0; i < 10; i++)
+        {
+            postings.Add(new Posting(_randomcodes.Random.Words()));
+        }
+
+        PostingDB.Add(postings);
+        var indexId = 6;
+        var posting = postings[indexId];
+        var db = PostingDB.Postings;
+        db.Should().HaveCount(postings.Count);
+        db.Should().ContainSingle(x => x.Value.Code == posting.Code);
     }
 }
